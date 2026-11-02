@@ -29,12 +29,15 @@ def sign_receipt(receipt_dict: dict[str, Any], private_key: Any) -> dict[str, An
     leaf_root = hash_leaf(h).hex()
 
     sub_id = receipt_id.replace("rcpt_", "")[:12]
-    receipt["merkle"] = merkle_meta or {
-        "root": leaf_root,
-        "leaf_index": 0,
-        "batch_id": f"batch_{sub_id}",
-        "proof": [],
-    }
+    if merkle_meta and merkle_meta.get("proof"):
+        receipt["merkle"] = merkle_meta
+    else:
+        receipt["merkle"] = {
+            "root": leaf_root,
+            "leaf_index": 0,
+            "batch_id": (merkle_meta or {}).get("batch_id") or f"batch_{sub_id}",
+            "proof": [],
+        }
     receipt["anchor"] = anchor_meta or {
         "chain_id": 11155111,
         "tx_hash": f"0x{hashlib.sha256((receipt_id + ':anchor').encode()).hexdigest()}",
@@ -75,6 +78,7 @@ def verify_content_hash(receipt_dict: dict[str, Any], content_bytes: bytes) -> b
 
 def build_detection_receipt(
     *,
+    receipt_id: str | None = None,
     analysis_id: str,
     content_sha256: str,
     size_bytes: int,
@@ -94,7 +98,8 @@ def build_detection_receipt(
     tracks: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Construct and sign a canonical detection receipt conforming to SPEC §10."""
-    receipt_id = f"rcpt_{uuid.uuid4().hex[:16]}"
+    if receipt_id is None:
+        receipt_id = f"rcpt_{uuid.uuid4().hex[:16]}"
     now_iso = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     receipt: dict[str, Any] = {

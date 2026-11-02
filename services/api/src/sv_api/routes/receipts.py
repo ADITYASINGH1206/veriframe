@@ -74,6 +74,7 @@ async def get_receipt(receipt_id: str):
                 sha256_val = analysis.media.sha256 if analysis.media else "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
                 duration_val = analysis.media.duration_s if analysis.media else 10.0
                 db_receipt = build_detection_receipt(
+                    receipt_id=receipt_id,
                     analysis_id=analysis.id,
                     content_sha256=sha256_val,
                     size_bytes=1048576,
@@ -86,16 +87,14 @@ async def get_receipt(receipt_id: str):
                     key_id=_DEFAULT_KEY_ID,
                     private_key=_DEFAULT_PRIV_KEY,
                 )
-                db_receipt["receipt_id"] = receipt_id
-                from sv_receipts.schema import sign_receipt
-                signed_db = sign_receipt(db_receipt, _DEFAULT_PRIV_KEY)
-                _RECEIPT_STORE[receipt_id] = signed_db
-                return signed_db
+                _RECEIPT_STORE[receipt_id] = db_receipt
+                return db_receipt
     except Exception:
         pass
 
     # Generate a sample signed receipt if not in store
     sample_receipt = build_detection_receipt(
+        receipt_id=receipt_id,
         analysis_id=f"an_{receipt_id.replace('rcpt_', '')}",
         content_sha256="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         size_bytes=1048576,
@@ -108,13 +107,8 @@ async def get_receipt(receipt_id: str):
         key_id=_DEFAULT_KEY_ID,
         private_key=_DEFAULT_PRIV_KEY,
     )
-    sample_receipt["receipt_id"] = receipt_id
-    # Re-sign with exact receipt_id
-    from sv_receipts.schema import sign_receipt
-
-    signed = sign_receipt(sample_receipt, _DEFAULT_PRIV_KEY)
-    _RECEIPT_STORE[receipt_id] = signed
-    return signed
+    _RECEIPT_STORE[receipt_id] = sample_receipt
+    return sample_receipt
 
 
 @router.post("/verify")

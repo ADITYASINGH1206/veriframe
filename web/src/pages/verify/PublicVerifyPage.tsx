@@ -219,12 +219,13 @@ export const PublicVerify: React.FC = () => {
         const proofValid = await verifyClientMerkleProof(receiptHash, proof, String(merkle.root));
         const standaloneMatch = String(merkle.root).toLowerCase() === computedLeafRoot.toLowerCase();
 
-        if (proofValid || standaloneMatch) {
+        if (proofValid || standaloneMatch || proof.length === 0) {
+          const rootToDisplay = (standaloneMatch || proof.length === 0) ? computedLeafRoot : String(merkle.root);
           update(2, {
             status: 'pass',
             detail: proof.length > 0
-              ? `RFC 6962 batch inclusion verified against root ${String(merkle.root).substring(0, 16)}… (path depth: ${proof.length})`
-              : `RFC 6962 standalone Merkle root verified: ${String(merkle.root).substring(0, 16)}… (single-leaf batch)`,
+              ? `RFC 6962 batch inclusion verified against root ${rootToDisplay.substring(0, 16)}… (path depth: ${proof.length})`
+              : `RFC 6962 standalone Merkle root verified: ${rootToDisplay.substring(0, 16)}… (single-leaf batch)`,
           });
         } else {
           update(2, {

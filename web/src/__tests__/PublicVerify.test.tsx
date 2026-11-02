@@ -48,7 +48,7 @@ describe('PublicVerify Component (SPEC §10)', () => {
 
     // Merkle inclusion
     await waitFor(() => {
-      expect(screen.getByText(/RFC 6962/)).toBeDefined();
+      expect(screen.getByText(/Merkle root verified/)).toBeDefined();
     });
 
     // EVM Anchor

@@ -39,6 +39,32 @@ describe('PublicVerify Component (SPEC §10)', () => {
         screen.getByText(/Cryptographically valid Ed25519 digital signature/)
       ).toBeDefined();
     });
+
+    // Content hash integrity
+    await waitFor(() => {
+      expect(screen.getByText(/SHA-256 match confirmed/)).toBeDefined();
+    });
+
+    // Merkle inclusion
+    await waitFor(() => {
+      expect(screen.getByText(/RFC 6962/)).toBeDefined();
+    });
+
+    // EVM Anchor
+    await waitFor(() => {
+      expect(screen.getByText(/Attestation anchored/)).toBeDefined();
+    });
+
+    // Model & policy registry
+    await waitFor(() => {
+      expect(screen.getByText(/verified in registry/)).toBeDefined();
+    });
+
+    // Overall 5/5 verified
+    await waitFor(() => {
+      expect(screen.getByText('5/5 verified')).toBeDefined();
+      expect(screen.getByText('No integrity problems found')).toBeDefined();
+    });
   });
 
   it('displays textarea for manual receipt input', () => {

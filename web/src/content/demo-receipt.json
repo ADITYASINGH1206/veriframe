@@ -40,6 +40,18 @@
       "decisive": true
     }
   ],
+  "merkle": {
+    "root": "1b321e66824bd741d7b39b5f7c84a71501e01c26095a82062e4c52e9a48ac521",
+    "leaf_index": 0,
+    "batch_id": "batch_demo_8832",
+    "proof": []
+  },
+  "anchor": {
+    "chain_id": 11155111,
+    "tx_hash": "0x7a83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+    "block_number": 6842100,
+    "contract": "0x4465228D1b2e1B2E057398E1584852109869a193"
+  },
   "signature": {
     "alg": "Ed25519",
     "value": "a7Ir1r9IsiGDA_WkO7-a4iJrCUBQFjeOaYMFx3PoA5mO2cKUqSBIE118STSPI0XDy_uzd-Ov3fmadck-qK2VCg"

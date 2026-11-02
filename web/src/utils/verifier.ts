@@ -91,6 +91,8 @@ export function verifyEd25519Signature(
       return false;
     }
     delete receiptCopy.signature;
+    delete receiptCopy.merkle;
+    delete receiptCopy.anchor;
 
     const canonicalJson = canonicalizeJson(receiptCopy);
     const messageBytes = new TextEncoder().encode(canonicalJson);

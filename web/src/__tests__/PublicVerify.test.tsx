@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { PublicVerify } from '../pages/verify/PublicVerifyPage';
+import sampleReceipt from '../content/demo-receipt.json';
 
 describe('PublicVerify Component (SPEC §10)', () => {
   it('renders initial verification state with all 5 steps', () => {
@@ -64,6 +65,30 @@ describe('PublicVerify Component (SPEC §10)', () => {
     await waitFor(() => {
       expect(screen.getByText('5/5 verified')).toBeDefined();
       expect(screen.getByText('No integrity problems found')).toBeDefined();
+    });
+  });
+
+  it('correctly fails checks when tampered data is provided', async () => {
+    render(<PublicVerify />);
+    const textarea = screen.getByPlaceholderText(/Paste detection receipt JSON here/i);
+
+    // Tampered demo receipt where score/decision was modified and invalid anchor/model
+    const tampered = {
+      ...sampleReceipt,
+      result: { decision: 'likely_manipulated', p_bal: 0.99 },
+      anchor: { chain_id: 11155111, contract: 'invalid_contract', tx_hash: 'bad_tx' },
+      model: { bundle_id: 'unknown_fake_model' },
+    };
+
+    fireEvent.change(textarea, { target: { value: JSON.stringify(tampered) } });
+
+    await waitFor(() => {
+      // Signature must fail because payload was modified
+      expect(screen.getByText(/Ed25519 signature verification failed/)).toBeDefined();
+      // EVM anchor must fail because contract address is invalid
+      expect(screen.getByText(/Invalid EVM anchor contract format/)).toBeDefined();
+      // Model registry must fail because model is unknown
+      expect(screen.getByText(/is not recognized in the verified model registry/)).toBeDefined();
     });
   });
 

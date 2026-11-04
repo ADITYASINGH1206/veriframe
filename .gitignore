@@ -42,6 +42,7 @@ contracts/broadcast/
 contracts/cache/
 
 # Storage & Temporary
+*.dll
 storage/
 tmp/
 data/

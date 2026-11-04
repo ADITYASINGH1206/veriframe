@@ -24,7 +24,9 @@ def get_database_url() -> str:
     return url
 
 
-engine = create_async_engine(get_database_url(), echo=False, future=True)
+db_url = get_database_url()
+connect_args = {"timeout": 30} if "sqlite" in db_url else {}
+engine = create_async_engine(db_url, connect_args=connect_args, echo=False, future=True)
 
 async_session_maker = async_sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False, autocommit=False, autoflush=False
@@ -43,6 +45,14 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 async def init_db() -> None:
     """Create all database tables."""
     async with engine.begin() as conn:
+        if "sqlite" in get_database_url():
+            from sqlalchemy import text
+            try:
+                await conn.execute(text("PRAGMA journal_mode=WAL"))
+                await conn.execute(text("PRAGMA busy_timeout=30000"))
+                await conn.execute(text("PRAGMA synchronous=NORMAL"))
+            except Exception:
+                pass
         await conn.run_sync(Base.metadata.create_all)
         from sqlalchemy import text
         try:

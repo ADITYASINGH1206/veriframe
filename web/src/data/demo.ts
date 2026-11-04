@@ -16,8 +16,8 @@ export const DEMO_PRESETS: Record<string, PolicyPreset> = {
   'strict-low-fpr': {
     policy_id: 'strict-low-fpr',
     version: 1,
-    name: 'Strict Low False-Positive Rate',
-    description: 'Optimized for in-domain deployment at low base-rate (pi=1%) with two-stage cascade.',
+    name: 'Strict',
+    description: 'Optimized for low base-rate automated screening (pi=1%) with two-stage cascade.',
     target_prevalence: 0.01,
     stage1_variant: 'smsdt-s-a',
     stage2_variant: 'smsdt-st-b',
@@ -29,8 +29,8 @@ export const DEMO_PRESETS: Record<string, PolicyPreset> = {
   'transfer-calibrated': {
     policy_id: 'transfer-calibrated',
     version: 1,
-    name: 'Transfer Calibrated',
-    description: 'Mixed or unknown sources. Uses ST until the Full model (B1) is available.',
+    name: 'Balanced',
+    description: 'Balanced cross-generator detection (pi=5%) with stage-2 decider.',
     target_prevalence: 0.05,
     stage1_variant: 'smsdt-s-a',
     stage2_variant: 'smsdt-st-b',
@@ -42,8 +42,8 @@ export const DEMO_PRESETS: Record<string, PolicyPreset> = {
   'evidence-desk': {
     policy_id: 'evidence-desk',
     version: 1,
-    name: 'Evidence Desk',
-    description: 'Low-volume, high-stakes review; no cascade.',
+    name: 'High Sensitivity',
+    description: 'High-sensitivity forensic review (pi=20%) running full ST on all tracks with no early exit.',
     target_prevalence: 0.2,
     stage1_variant: 'smsdt-st-b',
     stage2_variant: 'smsdt-st-b',

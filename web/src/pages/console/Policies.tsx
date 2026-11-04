@@ -47,12 +47,14 @@ const Policies: React.FC = () => {
             : list.map((p) => (
                 <button key={p.policy_id} type="button" onClick={() => setSelected(p.policy_id)} className="text-left" aria-pressed={selected === p.policy_id}>
                   <Card interactive className={cn('h-full p-5', selected === p.policy_id && 'border-accent/60 shadow-glow')}>
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-mono text-xs text-muted">{p.policy_id}</p>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="text-base font-semibold text-text">{p.name}</h3>
+                        <p className="font-mono text-xs text-muted">{p.policy_id}</p>
+                      </div>
                       <Badge tone={selected === p.policy_id ? 'accent' : 'neutral'}>v{p.version}</Badge>
                     </div>
-                    <h3 className="mt-2 text-sm font-semibold text-text">{p.name}</h3>
-                    <p className="mt-1 line-clamp-2 text-xs text-muted">{p.description}</p>
+                    <p className="mt-2 line-clamp-2 text-xs text-muted">{p.description}</p>
                     <BandBar low={p.thresholds.tau_authentic} high={p.thresholds.tau_manipulated} />
                     <div className="mt-1.5 flex justify-between font-mono text-[10px] text-muted">
                       <span>{p.thresholds.tau_authentic.toFixed(2)}</span>

@@ -155,7 +155,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-muted">Policy</span>
                   <span className="font-mono text-text">
-                    {preset.policy_id} v{preset.version}
+                    {preset.name} (v{preset.version})
                   </span>
                 </div>
                 <div className="flex items-center justify-between">

@@ -45,8 +45,8 @@ POLICY_PRESETS: dict[str, PolicyConfig] = {
     "strict-low-fpr": PolicyConfig(
         policy_id="strict-low-fpr",
         version=1,
-        name="Strict Low False-Positive Rate",
-        description="Optimized for in-domain deployment at low base-rate (pi=1%) with two-stage cascade.",
+        name="Strict",
+        description="Optimized for low base-rate automated screening (pi=1%) with two-stage cascade.",
         target_prevalence=0.01,
         stage1_variant="smsdt-s-a",
         stage2_variant="smsdt-st-b",
@@ -58,8 +58,8 @@ POLICY_PRESETS: dict[str, PolicyConfig] = {
     "transfer-calibrated": PolicyConfig(
         policy_id="transfer-calibrated",
         version=1,
-        name="Transfer Calibrated",
-        description="Balanced cross-generator transfer policy (pi=5%) with stage-2 decider.",
+        name="Balanced",
+        description="Balanced cross-generator detection (pi=5%) with stage-2 decider.",
         target_prevalence=0.05,
         stage1_variant="smsdt-s-a",
         stage2_variant="smsdt-st-b",
@@ -71,8 +71,8 @@ POLICY_PRESETS: dict[str, PolicyConfig] = {
     "evidence-desk": PolicyConfig(
         policy_id="evidence-desk",
         version=1,
-        name="Evidence Desk High-Sensitivity",
-        description="Forensic investigation desk mode (pi=20%) running full ST on all tracks with no early exit.",
+        name="High Sensitivity",
+        description="High-sensitivity forensic review (pi=20%) running full ST on all tracks with no early exit.",
         target_prevalence=0.20,
         stage1_variant="smsdt-st-b",
         stage2_variant="smsdt-st-b",
@@ -84,14 +84,23 @@ POLICY_PRESETS: dict[str, PolicyConfig] = {
 }
 
 
+POLICY_ALIASES: dict[str, str] = {
+    "strict": "strict-low-fpr",
+    "balanced": "transfer-calibrated",
+    "high-sensitivity": "evidence-desk",
+    "sensitive": "evidence-desk",
+}
+
+
 def get_policy(policy_id: str) -> PolicyConfig:
     """Retrieve policy preset by id or return default strict-low-fpr with warning."""
-    if policy_id not in POLICY_PRESETS:
+    resolved_id = POLICY_ALIASES.get(policy_id.lower(), policy_id)
+    if resolved_id not in POLICY_PRESETS:
         logger.warning(
             f"Unknown policy_id '{policy_id}' requested. Falling back to default 'strict-low-fpr'."
         )
         return POLICY_PRESETS["strict-low-fpr"]
-    return POLICY_PRESETS[policy_id]
+    return POLICY_PRESETS[resolved_id]
 
 
 def assign_decision_band(

@@ -14,6 +14,15 @@ const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, ch
   </div>
 );
 
+const POLICY_NAMES: Record<string, string> = {
+  'strict-low-fpr': 'Strict',
+  'transfer-calibrated': 'Balanced',
+  'evidence-desk': 'High Sensitivity',
+  'strict': 'Strict',
+  'balanced': 'Balanced',
+  'high-sensitivity': 'High Sensitivity',
+};
+
 export const VerdictCard: React.FC<{ c: CaseView; preset?: PolicyPreset }> = ({ c, preset }) => {
   const decisive = c.tracks.find((t) => t.decisive);
   const stage = c.cascade ? (c.cascade.exitedEarly ? `${c.cascade.stage1Model} (stage 1, exited early)` : `${c.cascade.stage2Model ?? c.cascade.stage1Model} (stage 2)`) : '—';
@@ -45,7 +54,7 @@ export const VerdictCard: React.FC<{ c: CaseView; preset?: PolicyPreset }> = ({ 
             <p className="text-xs text-muted">
               Decided by <span className="font-mono text-text">{stage}</span> · policy{' '}
               <span className="font-mono text-text">
-                {c.policyId}
+                {preset?.name ?? (POLICY_NAMES[c.policyId] ?? c.policyId)}
                 {c.policyVersion != null && ` v${c.policyVersion}`}
               </span>
               {decisive && c.tracks.length > 0 && (

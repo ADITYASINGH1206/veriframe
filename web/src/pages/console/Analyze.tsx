@@ -283,10 +283,10 @@ const Analyze: React.FC = () => {
               <label className="block">
                 <span className="mb-1.5 block text-xs font-medium text-muted">Policy</span>
                 <select value={policy} onChange={(e) => setPolicy(e.target.value)} className="h-9 w-full rounded-md border border-border bg-bg px-3 text-text focus:border-accent focus:outline-none">
-                  {presetList.length === 0 && <option value="strict-low-fpr">strict-low-fpr</option>}
+                  {presetList.length === 0 && <option value="strict-low-fpr">Strict</option>}
                   {presetList.map((p) => (
                     <option key={p.policy_id} value={p.policy_id}>
-                      {p.name} ({p.policy_id})
+                      {p.name}
                     </option>
                   ))}
                 </select>

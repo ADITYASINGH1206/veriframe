@@ -44,7 +44,6 @@ const Analyze: React.FC = () => {
   const [dragging, setDragging] = useState(false);
   const [policy, setPolicy] = useState('strict-low-fpr');
   const [prevalence, setPrevalence] = useState(0.01);
-  const [forceFull, setForceFull] = useState(false);
   const [gradcam, setGradcam] = useState(true);
   const [skipCache, setSkipCache] = useState(false);
   const [externalRef, setExternalRef] = useState('');
@@ -81,7 +80,7 @@ const Analyze: React.FC = () => {
     { id: 'upload', label: mode === 'file' ? 'Upload' : 'Submit', state: progress == null ? 'pending' : progress < 1 ? 'active' : 'done', detail: progress != null && progress < 1 ? `${Math.round(progress * 100)}%` : undefined },
     { id: 'queued', label: 'Queued', state: progress != null && progress >= 1 ? 'active' : 'pending' },
     { id: 'faces', label: 'Faces', state: 'pending' },
-    { id: 'cascade', label: 'Cascade', state: 'pending' },
+    { id: 'model', label: 'Model', state: 'pending' },
     { id: 'receipt', label: 'Receipt', state: 'pending' },
   ];
 
@@ -114,7 +113,6 @@ const Analyze: React.FC = () => {
             source_url: url,
             policy_id: policy,
             prior_prevalence: prevalence,
-            mode: forceFull ? 'full' : 'auto',
             explain_gradcam: gradcam,
             skip_cache: skipCache,
             external_ref: externalRef || null,
@@ -301,25 +299,7 @@ const Analyze: React.FC = () => {
                   ))}
                 </select>
               </label>
-              <div>
-                <span className="mb-1.5 block text-xs font-medium text-muted">Mode</span>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { v: false, label: 'Auto cascade' },
-                    { v: true, label: 'Force full model' },
-                  ].map((o) => (
-                    <button
-                      key={o.label}
-                      type="button"
-                      aria-pressed={forceFull === o.v}
-                      onClick={() => setForceFull(o.v)}
-                      className={cn('h-9 rounded-md border text-xs font-medium transition-colors', forceFull === o.v ? 'border-accent bg-accent/10 text-accent' : 'border-border text-muted hover:bg-surface-2')}
-                    >
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+
               <label className="flex items-center gap-2 text-text">
                 <input type="checkbox" checked={gradcam} onChange={(e) => setGradcam(e.target.checked)} className="h-4 w-4 accent-[rgb(var(--accent))]" />
                 Deep explain (Grad-CAM, slower)

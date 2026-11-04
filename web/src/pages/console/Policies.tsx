@@ -70,9 +70,7 @@ const Policies: React.FC = () => {
           <CardHeader title={`${active.name} · details`} icon={<SlidersHorizontal className="h-4 w-4" />} />
           <dl className="grid gap-x-8 gap-y-3 p-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
             {[
-              ['Stage 1 model', active.stage1_variant],
-              ['Stage 2 model', active.stage2_variant],
-              ['Cascade', active.cascade_enabled ? `on · exit below ${active.exit_below_p_bal.toFixed(2)}` : 'off'],
+              ['Model', 'S-MSDT (Spatio-Temporal)'],
               ['Configured prevalence', `${(active.target_prevalence * 100).toFixed(0)}%`],
               ['Audit sample rate', `${(active.audit_sample_rate * 100).toFixed(0)}% of “likely authentic”`],
               ['Band boundaries', `${active.thresholds.tau_authentic.toFixed(2)} / ${active.thresholds.tau_manipulated.toFixed(2)}`],
@@ -95,16 +93,12 @@ const Policies: React.FC = () => {
         />
         <div className="grid gap-6 p-5 lg:grid-cols-[1fr_1.2fr]">
           <div className="space-y-5 text-sm">
-            <label className="block">
+            <div>
               <span className="mb-1.5 block text-xs font-medium text-muted">Model</span>
-              <select value={model} onChange={(e) => setModel(e.target.value as ModelKey)} className="h-9 w-full rounded-md border border-border bg-bg px-3 text-text focus:border-accent focus:outline-none">
-                {(Object.keys(paperA.models) as ModelKey[]).map((k) => (
-                  <option key={k} value={k}>
-                    {paperA.models[k].label} — {paperA.models[k].description}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <div className="flex h-9 items-center rounded-md border border-border bg-surface-2 px-3 text-xs font-medium text-text">
+                S-MSDT (Spatio-Temporal)
+              </div>
+            </div>
             <div>
               <span className="mb-1.5 block text-xs font-medium text-muted">Operating point</span>
               <div className="grid grid-cols-2 gap-2">

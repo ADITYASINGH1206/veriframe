@@ -159,9 +159,9 @@ const Dashboard: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted">Cascade</span>
+                  <span className="text-muted">Model</span>
                   <span className="font-mono text-text">
-                    {preset.stage1_variant} → {preset.stage2_variant}
+                    S-MSDT (Spatio-Temporal)
                   </span>
                 </div>
                 <div className="flex items-center justify-between">

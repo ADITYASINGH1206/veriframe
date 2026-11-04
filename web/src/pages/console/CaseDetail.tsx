@@ -128,7 +128,7 @@ const CaseDetail: React.FC = () => {
             stages={[
               { id: 'ingest', label: 'Ingest', state: 'done' },
               { id: 'preprocess', label: 'Faces', state: c.status === 'processing' ? 'active' : 'pending' },
-              { id: 'gpu', label: 'Cascade', state: 'pending' },
+              { id: 'gpu', label: 'Model', state: 'pending' },
               { id: 'finalize', label: 'Receipt', state: 'pending' },
             ]}
           />

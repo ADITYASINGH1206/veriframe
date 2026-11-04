@@ -25,7 +25,6 @@ const POLICY_NAMES: Record<string, string> = {
 
 export const VerdictCard: React.FC<{ c: CaseView; preset?: PolicyPreset }> = ({ c, preset }) => {
   const decisive = c.tracks.find((t) => t.decisive);
-  const stage = c.cascade ? (c.cascade.exitedEarly ? `${c.cascade.stage1Model} (stage 1, exited early)` : `${c.cascade.stage2Model ?? c.cascade.stage1Model} (stage 2)`) : '—';
   const tauLow = c.thresholds.tauAuthentic ?? preset?.thresholds.tau_authentic ?? null;
   const tauHigh = c.thresholds.tauManipulated ?? preset?.thresholds.tau_manipulated ?? null;
   return (
@@ -52,7 +51,7 @@ export const VerdictCard: React.FC<{ c: CaseView; preset?: PolicyPreset }> = ({ 
               <p className="text-sm text-muted">No score available.</p>
             )}
             <p className="text-xs text-muted">
-              Decided by <span className="font-mono text-text">{stage}</span> · policy{' '}
+              Model <span className="font-mono text-text">S-MSDT</span> · policy{' '}
               <span className="font-mono text-text">
                 {preset?.name ?? (POLICY_NAMES[c.policyId] ?? c.policyId)}
                 {c.policyVersion != null && ` v${c.policyVersion}`}
@@ -105,13 +104,7 @@ export const SignalsPanel: React.FC<{ c: CaseView }> = ({ c }) => {
         <Row label="Face manipulation">
           <span className="font-mono">{c.pBal != null ? c.pBal.toFixed(2) : '—'}</span>
         </Row>
-        {c.cascade && (
-          <Row label="Stage 1 score">
-            <span className="font-mono">
-              {c.cascade.stage1PBal != null ? c.cascade.stage1PBal.toFixed(2) : '—'} {c.cascade.exitedEarly ? '· exited early' : '→ escalated'}
-            </span>
-          </Row>
-        )}
+
         <Row label="C2PA credentials">
           {c2pa ? (c2pa.present ? (c2pa.ai_disclosed ? 'Present · AI disclosed' : 'Present') : 'None found') : 'None found'}
         </Row>
@@ -198,10 +191,10 @@ export const ModelPanel: React.FC<{ c: CaseView }> = ({ c }) => {
       <CardHeader title="Model card" icon={<Cpu className="h-4 w-4" />} />
       <div className="divide-y divide-border px-4">
         {c.models.length === 0 ? (
-          <Row label="Models">—</Row>
+          <Row label="Model">S-MSDT (Spatio-Temporal)</Row>
         ) : (
           c.models.map((mdl, i) => (
-            <Row key={i} label={mdl.role ?? 'model'}>
+            <Row key={i} label="Model">
               <span className="font-mono">{mdl.model_id}</span>
             </Row>
           ))

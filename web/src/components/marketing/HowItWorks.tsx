@@ -6,7 +6,7 @@ import { SectionHeading } from '../../design/ui';
 const STEPS = [
   { icon: FileVideo, title: 'Upload or link a video', body: 'Files or URLs are hashed with SHA-256 on arrival; duplicates reuse earlier results.' },
   { icon: ScanFace, title: 'Faces detected and tracked', body: 'Up to four face tracks are aligned and cut into short clips the same way as in training.' },
-  { icon: Layers, title: 'A two-stage cascade screens', body: 'A fast single-frame model exits clear cases early; the rest go to the temporal model.' },
+  { icon: Layers, title: 'S-MSDT temporal screening', body: 'The spatio-temporal video model screens face tracks for manipulation and deepfake artifacts.' },
   { icon: Gauge, title: 'Calibrated score and evidence', body: 'You get a calibrated score, a decision band from your policy, and a patch-evidence map.' },
   { icon: FileSignature, title: 'A signed receipt', body: 'Hashes of the video, model, calibration and policy are signed so anyone can verify them.' },
 ];

@@ -89,7 +89,7 @@ const FEATURES = [
     className: 'lg:col-span-2',
   },
   { icon: Grid3x3, title: 'Evidence maps', body: 'Patch-level evidence is mapped back onto the original frames, so reviewers see where the model looked.', visual: <MiniGrid /> },
-  { icon: GitBranch, title: 'Two-stage cascade', body: 'A cheap single-frame screen handles clear cases; only uncertain faces reach the temporal model.', visual: <CascadeDiagram /> },
+  { icon: GitBranch, title: 'S-MSDT temporal model', body: 'High-precision spatio-temporal model screens faces across frames for manipulation and deepfake artifacts.', visual: <CascadeDiagram /> },
   { icon: FileSignature, title: 'Verifiable receipts', body: 'Every decision is a signed, canonical record. Verification runs in the browser, without trusting the operator.', visual: <TypingHash /> },
   { icon: Keyboard, title: 'Reviewer workspace', body: 'Keyboard-first triage with evidence, timelines and reason codes. Decisions issue superseding receipts.', visual: <Keys /> },
   {

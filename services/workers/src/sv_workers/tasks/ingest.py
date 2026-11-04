@@ -16,6 +16,29 @@ async def _async_ingest(
     analysis_id: str, media_path: str, source_url: str | None = None
 ) -> dict[str, Any]:
     """Execute ingest pipeline: hashing, deduplication check, metadata extraction."""
+    try:
+        return await _inner_async_ingest(analysis_id, media_path, source_url)
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).error("Ingest task failed for %s: %s", analysis_id, exc, exc_info=True)
+        try:
+            async with async_session_maker() as session:
+                stmt = select(AnalysisModel).where(AnalysisModel.id == analysis_id)
+                res = await session.execute(stmt)
+                analysis = res.scalars().first()
+                if analysis:
+                    analysis.status = "failed"
+                    analysis.error_info = json.dumps({"message": f"Ingest error: {exc}"})
+                    await session.commit()
+            await publish_progress(analysis_id, "ingest", 100, f"Ingest failed: {exc}")
+        except Exception:
+            pass
+        return {"error": str(exc), "status": "failed"}
+
+
+async def _inner_async_ingest(
+    analysis_id: str, media_path: str, source_url: str | None = None
+) -> dict[str, Any]:
     # Validate source URL against SSRF violations if provided
     if source_url:
         from sv_api.security import validate_url_ssrf

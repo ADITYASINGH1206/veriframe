@@ -49,3 +49,7 @@ async def init_db() -> None:
             await conn.execute(text('ALTER TABLE tracks ADD COLUMN box TEXT'))
         except Exception:
             pass
+        try:
+            await conn.execute(text("UPDATE analyses SET status = 'failed', error_info = '{\"message\": \"Analysis interrupted: server was restarted before completion. Please re-submit.\"}' WHERE status IN ('queued', 'processing')"))
+        except Exception:
+            pass

@@ -129,6 +129,16 @@ def render_overlay_video(
     sample_h, sample_w = source_frames[0].shape[:2]
     target_w, target_h = cap_resolution_720p(sample_w, sample_h, max_h=max_h, max_w=max_w)
 
+    # Ensure Windows loads openh264 if available in project root
+    if hasattr(os, "add_dll_directory"):
+        try:
+            from pathlib import Path
+            proj_root = Path(__file__).resolve().parents[4]
+            if (proj_root / "openh264-2.5.0-win64.dll").exists():
+                os.add_dll_directory(str(proj_root))
+        except Exception:
+            pass
+
     # Try H.264 codecs or fallback to mp4v
     fourcc = _fourcc("avc1")
     writer = cv2.VideoWriter(output_path, fourcc, fps, (target_w, target_h))

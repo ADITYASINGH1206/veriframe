@@ -73,6 +73,29 @@ async def _async_gpu(
     analysis_id: str, tracks_or_npz: str | list[ProcessedTrackClips]
 ) -> dict[str, Any]:
     """Execute model cascade inference on tracks and generate patch evidence."""
+    try:
+        return await _inner_async_gpu(analysis_id, tracks_or_npz)
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).error("GPU task failed for %s: %s", analysis_id, exc, exc_info=True)
+        try:
+            async with async_session_maker() as session:
+                stmt = select(AnalysisModel).where(AnalysisModel.id == analysis_id)
+                res = await session.execute(stmt)
+                analysis = res.scalars().first()
+                if analysis:
+                    analysis.status = "failed"
+                    analysis.error_info = json.dumps({"message": f"GPU inference error: {exc}"})
+                    await session.commit()
+            await publish_progress(analysis_id, "gpu", 100, f"Inference failed: {exc}")
+        except Exception:
+            pass
+        return {"error": str(exc), "status": "failed"}
+
+
+async def _inner_async_gpu(
+    analysis_id: str, tracks_or_npz: str | list[ProcessedTrackClips]
+) -> dict[str, Any]:
     if isinstance(tracks_or_npz, str):
         tracks = load_tracks_npz(tracks_or_npz)
     else:

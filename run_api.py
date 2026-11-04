@@ -5,6 +5,14 @@ from pathlib import Path
 # Repo root directory
 ROOT = Path(__file__).resolve().parent
 
+# Ensure Windows loads OpenH264 DLLs from the project root
+if hasattr(os, "add_dll_directory"):
+    try:
+        os.add_dll_directory(str(ROOT))
+    except Exception:
+        pass
+os.environ["PATH"] = str(ROOT) + os.pathsep + os.environ.get("PATH", "")
+
 # Add all packages and services to sys.path using absolute paths
 package_dirs = [
     ROOT / "packages" / "sv_core" / "src",
@@ -39,4 +47,3 @@ if __name__ == "__main__":
     print(f"Starting SENTINEL-V API on http://127.0.0.1:8080 (ENGINE_MODE: {os.environ.get('SV_ENGINE_MODE')})...")
     reload = os.environ.get("SV_RELOAD", "false").lower() == "true"
     uvicorn.run("sv_api.main:app", host="127.0.0.1", port=8080, reload=reload)
-

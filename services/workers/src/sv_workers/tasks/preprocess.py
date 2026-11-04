@@ -37,6 +37,27 @@ def save_tracks_npz(tracks: list[ProcessedTrackClips], npz_path: str) -> None:
 
 async def _async_preprocess(analysis_id: str, media_path: str) -> dict[str, Any]:
     """Execute preprocessing: decode, detect, track, align, and form clips."""
+    try:
+        return await _inner_async_preprocess(analysis_id, media_path)
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).error("Preprocess task failed for %s: %s", analysis_id, exc, exc_info=True)
+        try:
+            async with async_session_maker() as session:
+                stmt = select(AnalysisModel).where(AnalysisModel.id == analysis_id)
+                res = await session.execute(stmt)
+                analysis = res.scalars().first()
+                if analysis:
+                    analysis.status = "failed"
+                    analysis.error_info = json.dumps({"message": f"Preprocess error: {exc}"})
+                    await session.commit()
+            await publish_progress(analysis_id, "preprocess", 100, f"Preprocessing failed: {exc}")
+        except Exception:
+            pass
+        return {"error": str(exc), "status": "failed"}
+
+
+async def _inner_async_preprocess(analysis_id: str, media_path: str) -> dict[str, Any]:
     detector = MockFaceDetector() if settings.ENGINE_MODE == "mock" else None
 
     ext = os.path.splitext(media_path)[1].lower()

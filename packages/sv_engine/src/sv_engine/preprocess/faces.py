@@ -106,18 +106,18 @@ class MockFaceDetector:
             return []
 
         H, W = frame_bgr.shape[:2]
-        cx, cy = W / 2.0, H / 2.0
-
-        # Eyes at cx +/- ioc_dist / 2
-        half_eye = self.ioc_dist / 2.0
-        eye_y = cy - 20.0
+        cx, cy = W / 2.0, H * 0.35
+        # Proportional eye distance for natural face scaling
+        effective_ioc = max(self.ioc_dist, min(W, H) * 0.12)
+        half_eye = effective_ioc / 2.0
+        eye_y = cy - effective_ioc * 0.35
         kps5 = np.array(
             [
                 [cx - half_eye, eye_y],  # right eye
                 [cx + half_eye, eye_y],  # left eye
                 [cx, cy],  # nose
-                [cx - half_eye * 0.8, cy + 25.0],  # mouth right
-                [cx + half_eye * 0.8, cy + 25.0],  # mouth left
+                [cx - half_eye * 0.75, cy + effective_ioc * 0.55],  # mouth right
+                [cx + half_eye * 0.75, cy + effective_ioc * 0.55],  # mouth left
             ],
             dtype=np.float32,
         )

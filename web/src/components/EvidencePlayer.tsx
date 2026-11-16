@@ -9,6 +9,7 @@ export interface ClipScoreData {
   start_s: number;
   p: number;
   patches?: number[];
+  box?: { x: number; y: number; w: number; h: number };
 }
 
 export interface TrackData {
@@ -107,15 +108,47 @@ export const EvidencePlayer: React.FC<EvidencePlayerProps> = ({
       const ch = vh * scale;
       const ox = (width - cw) / 2;
       const oy = (height - ch) / 2;
-      const bx = ox + activeTrack.box.x * cw;
-      const by = oy + activeTrack.box.y * ch;
-      const bw = activeTrack.box.w * cw;
-      const bh = activeTrack.box.h * ch;
 
-      const clip = activeTrack.clips.find((c, i) => {
+      // Find active clip matching current playback time or closest clip
+      let clip = activeTrack.clips.find((c, i) => {
         const next = activeTrack.clips[i + 1];
         return time >= c.start_s && (!next || time < next.start_s);
       });
+      if (!clip && activeTrack.clips.length > 0) {
+        if (time < activeTrack.clips[0].start_s) {
+          clip = activeTrack.clips[0];
+        } else {
+          clip = activeTrack.clips[activeTrack.clips.length - 1];
+        }
+      }
+
+      // Smoothly interpolate bounding box between clips so overlay tracks the moving face across frames
+      let activeBox = clip?.box || activeTrack.box;
+      if (activeTrack.clips.length > 1) {
+        for (let i = 0; i < activeTrack.clips.length - 1; i++) {
+          const c1 = activeTrack.clips[i];
+          const c2 = activeTrack.clips[i + 1];
+          if (time >= c1.start_s && time <= c2.start_s && c1.box && c2.box) {
+            const span = c2.start_s - c1.start_s;
+            const factor = span > 0 ? Math.min(1, Math.max(0, (time - c1.start_s) / span)) : 0;
+            activeBox = {
+              x: c1.box.x + (c2.box.x - c1.box.x) * factor,
+              y: c1.box.y + (c2.box.y - c1.box.y) * factor,
+              w: c1.box.w + (c2.box.w - c1.box.w) * factor,
+              h: c1.box.h + (c2.box.h - c1.box.h) * factor,
+            };
+            break;
+          }
+        }
+      }
+
+      if (!activeBox) return;
+
+      const bx = ox + activeBox.x * cw;
+      const by = oy + activeBox.y * ch;
+      const bw = activeBox.w * cw;
+      const bh = activeBox.h * ch;
+
       const score = clip ? clip.p : activeTrack.p_bal;
 
       // Draw Grad-CAM patch heatmap over detected face bounding box with adaptive min-max scaling

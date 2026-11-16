@@ -92,7 +92,22 @@ function makeClips(rand: () => number, u: number, nClips: number, peakAt: number
     const bump = Math.exp(-((k - peakAt) ** 2) / 2.5) * 1.6;
     const logit = u - 0.6 + bump + (rand() - 0.5) * 0.9;
     const start_frame = Math.round(start_s * DEMO_FPS);
-    return { k, start_frame, end_frame: start_frame + 7, start_s: Number(start_s.toFixed(2)), p: Number(sigmoid(logit).toFixed(3)) };
+    const swayX = Math.sin((k / nClips) * Math.PI * 2) * 0.012;
+    const swayY = Math.cos((k / nClips) * Math.PI) * 0.008;
+    const clipBox = {
+      x: Number((DEMO_FACE_BOX.x + swayX).toFixed(4)),
+      y: Number((DEMO_FACE_BOX.y + swayY).toFixed(4)),
+      w: DEMO_FACE_BOX.w,
+      h: DEMO_FACE_BOX.h,
+    };
+    return {
+      k,
+      start_frame,
+      end_frame: start_frame + 7,
+      start_s: Number(start_s.toFixed(2)),
+      p: Number(sigmoid(logit).toFixed(3)),
+      box: clipBox,
+    };
   });
 }
 

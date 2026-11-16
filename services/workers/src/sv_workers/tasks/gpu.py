@@ -128,6 +128,21 @@ async def _inner_async_gpu(
     vid_width = 1280
     vid_height = 720
 
+    # Retrieve media dimensions from DB if available for accurate bounding box normalization
+    try:
+        async with async_session_maker() as session:
+            stmt_m = (
+                select(Media.width, Media.height)
+                .join(AnalysisModel, AnalysisModel.media_id == Media.id)
+                .where(AnalysisModel.id == analysis_id)
+            )
+            res_m = await session.execute(stmt_m)
+            row_m = res_m.first()
+            if row_m and row_m[0] and row_m[1]:
+                vid_width, vid_height = int(row_m[0]), int(row_m[1])
+    except Exception:
+        pass
+
     if os.path.exists(media_path):
         try:
             import cv2
@@ -191,6 +206,24 @@ async def _inner_async_gpu(
             except Exception:
                 ev_root = None
 
+        def _box_from_affine(M_mat: np.ndarray) -> dict[str, float] | None:
+            try:
+                import cv2
+                M_inv = cv2.invertAffineTransform(M_mat.astype(np.float32))
+                crop_pts = np.array([[0, 224, 224, 0], [0, 0, 224, 224], [1, 1, 1, 1]], dtype=np.float32)
+                frame_pts = M_inv @ crop_pts
+                min_x = float(np.min(frame_pts[0]))
+                max_x = float(np.max(frame_pts[0]))
+                min_y = float(np.min(frame_pts[1]))
+                max_y = float(np.max(frame_pts[1]))
+                norm_x = max(0.0, min(1.0, min_x / max(vid_width, 1)))
+                norm_y = max(0.0, min(1.0, min_y / max(vid_height, 1)))
+                norm_w = max(0.01, min(1.0 - norm_x, (max_x - min_x) / max(vid_width, 1)))
+                norm_h = max(0.01, min(1.0 - norm_y, (max_y - min_y) / max(vid_height, 1)))
+                return {"x": round(norm_x, 4), "y": round(norm_y, 4), "w": round(norm_w, 4), "h": round(norm_h, 4)}
+            except Exception:
+                return None
+
         clips_data = []
         for k in range(len(logits)):
             clip_dict = {
@@ -204,27 +237,19 @@ async def _inner_async_gpu(
                 patch_mean_k = np.mean(clip_out.patch_logits[k], axis=0)  # shape (256,)
                 patch_prob_k = 1.0 / (1.0 + np.exp(-patch_mean_k))
                 clip_dict["patches"] = [round(float(p), 4) for p in patch_prob_k]
+
+            # Compute dynamic face bounding box for this clip from its affine matrix
+            if trk.M_224 is not None and trk.M_224.shape[0] > k:
+                cb = _box_from_affine(trk.M_224[k, 0])
+                if cb:
+                    clip_dict["box"] = cb
             clips_data.append(clip_dict)
 
-        # Compute normalized face bounding box {x, y, w, h} from M_224 affine matrix
+        # Compute normalized face bounding box {x, y, w, h} from first clip's M_224 affine matrix
         track_box = None
-        try:
-            import cv2
-            if trk.M_224 is not None and trk.M_224.size > 0:
-                M_first = trk.M_224[0, 0]
-                M_inv = cv2.invertAffineTransform(M_first.astype(np.float32))
-                crop_pts = np.array([[0, 224, 224, 0], [0, 0, 224, 224], [1, 1, 1, 1]], dtype=np.float32)
-                frame_pts = M_inv @ crop_pts
-                min_x = float(np.min(frame_pts[0]))
-                max_x = float(np.max(frame_pts[0]))
-                min_y = float(np.min(frame_pts[1]))
-                max_y = float(np.max(frame_pts[1]))
-                norm_x = max(0.0, min(1.0, min_x / max(vid_width, 1)))
-                norm_y = max(0.0, min(1.0, min_y / max(vid_height, 1)))
-                norm_w = max(0.01, min(1.0 - norm_x, (max_x - min_x) / max(vid_width, 1)))
-                norm_h = max(0.01, min(1.0 - norm_y, (max_y - min_y) / max(vid_height, 1)))
-                track_box = {"x": round(norm_x, 4), "y": round(norm_y, 4), "w": round(norm_w, 4), "h": round(norm_h, 4)}
-        except Exception:
+        if trk.M_224 is not None and trk.M_224.size > 0:
+            track_box = _box_from_affine(trk.M_224[0, 0])
+        if not track_box:
             track_box = {"x": 0.35, "y": 0.2, "w": 0.3, "h": 0.5}
 
         track_records.append(
@@ -271,7 +296,22 @@ async def _inner_async_gpu(
         from sv_fusion.swinv2 import get_swinv2_detector
 
         gen_summary = {"enabled": False, "max": 0.0, "mean": 0.0, "flagged": False, "keyframes": []}
-        if os.path.exists(media_path):
+        # Retrieve media dimensions from DB if available for accurate bounding box normalization
+    try:
+        async with async_session_maker() as session:
+            stmt_m = (
+                select(Media.width, Media.height)
+                .join(AnalysisModel, AnalysisModel.media_id == Media.id)
+                .where(AnalysisModel.id == analysis_id)
+            )
+            res_m = await session.execute(stmt_m)
+            row_m = res_m.first()
+            if row_m and row_m[0] and row_m[1]:
+                vid_width, vid_height = int(row_m[0]), int(row_m[1])
+    except Exception:
+        pass
+
+    if os.path.exists(media_path):
             try:
                 keyframes = extract_video_keyframes(media_path, max_keyframes=8, interval_s=1.0)
                 if keyframes:

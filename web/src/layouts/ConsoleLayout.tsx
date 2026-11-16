@@ -188,12 +188,7 @@ export const ConsoleLayout: React.FC = () => {
             <ThemeToggle />
           </div>
         </header>
-        {isDemo && (
-          <div className="border-b border-band-review/25 bg-band-review/10 px-4 py-2 text-xs text-text sm:px-6">
-            The API list endpoints are not available, so the console is showing <strong>generated demo data</strong>. Nothing marked DEMO is an
-            actual analysis.
-          </div>
-        )}
+
         <main id="main" className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait" initial={false}>
             <m.div key={location.pathname} {...pageTransition} className="mx-auto w-full max-w-7xl">

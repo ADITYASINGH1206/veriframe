@@ -13,6 +13,7 @@ interface ScoreReadoutProps {
  * "≈ 1.6% at 1% prevalence", with the validation caveat.
  */
 export const ScoreReadout: React.FC<ScoreReadoutProps> = ({ p_bal, p_prior, prior_prevalence = 0.01, size = 'lg' }) => {
+  const [open, setOpen] = React.useState(false);
   const formattedScore = p_bal.toFixed(2);
   const formattedPrior = p_prior !== undefined ? (p_prior * 100).toFixed(1) : null;
   const prevalencePercent = (prior_prevalence * 100).toFixed(prior_prevalence < 0.01 ? 1 : 0);
@@ -26,13 +27,23 @@ export const ScoreReadout: React.FC<ScoreReadoutProps> = ({ p_bal, p_prior, prio
         {formattedPrior && (
           <span className="group relative inline-flex items-center gap-1 text-sm font-medium text-muted">
             ≈ {formattedPrior}% at {prevalencePercent}% prevalence
-            <Info className="h-3.5 w-3.5" aria-hidden />
+            <button
+              type="button"
+              onClick={() => setOpen((prev) => !prev)}
+              onBlur={() => setOpen(false)}
+              className="inline-flex cursor-pointer items-center text-muted hover:text-text focus:outline-none"
+              aria-label="Prevalence details"
+            >
+              <Info className="h-3.5 w-3.5" aria-hidden />
+            </button>
             <span
               role="tooltip"
-              className="pointer-events-none absolute left-0 top-full z-20 mt-2 w-72 rounded-md border border-border bg-surface p-3 text-xs font-normal leading-relaxed text-muted opacity-0 shadow-2 transition-opacity group-hover:opacity-100"
+              className={`absolute left-0 top-full z-20 mt-2 w-72 rounded-md border border-border bg-surface p-3 text-xs font-normal leading-relaxed text-text shadow-2 transition-opacity ${
+                open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0 group-hover:opacity-100'
+              }`}
             >
-              The score is calibrated for a 50/50 mix of authentic and manipulated videos. The second number re-weights it for the
-              prevalence configured in your policy: logit(p<sub>π</sub>) = logit(p<sub>bal</sub>) + log(π / (1 − π)).
+              The base score measures detected visual manipulation evidence. The estimated percentage reflects the
+              real-world likelihood of manipulation, adjusted for your organization&apos;s screening policy.
             </span>
           </span>
         )}

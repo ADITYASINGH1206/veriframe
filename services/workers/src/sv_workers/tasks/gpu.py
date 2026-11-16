@@ -296,22 +296,7 @@ async def _inner_async_gpu(
         from sv_fusion.swinv2 import get_swinv2_detector
 
         gen_summary = {"enabled": False, "max": 0.0, "mean": 0.0, "flagged": False, "keyframes": []}
-        # Retrieve media dimensions from DB if available for accurate bounding box normalization
-    try:
-        async with async_session_maker() as session:
-            stmt_m = (
-                select(Media.width, Media.height)
-                .join(AnalysisModel, AnalysisModel.media_id == Media.id)
-                .where(AnalysisModel.id == analysis_id)
-            )
-            res_m = await session.execute(stmt_m)
-            row_m = res_m.first()
-            if row_m and row_m[0] and row_m[1]:
-                vid_width, vid_height = int(row_m[0]), int(row_m[1])
-    except Exception:
-        pass
-
-    if os.path.exists(media_path):
+        if os.path.exists(media_path):
             try:
                 keyframes = extract_video_keyframes(media_path, max_keyframes=8, interval_s=1.0)
                 if keyframes:

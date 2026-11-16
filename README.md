@@ -56,18 +56,7 @@ npm --prefix web run dev
 
 ---
 
-### 2. Reset to a Clean State Before a Demo
-
-If you tested videos earlier and want to reset the database and clear all cached files before presenting to an audience:
-
-```powershell
-python clear_history.py
-```
-*This wipes old test analyses, temporary evidence folders, and cached results so your presentation starts completely fresh.*
-
----
-
-### 3. Demo Walkthrough & Feature Highlights
+### 2. Demo Walkthrough & Feature Highlights
 
 1. **Analyze (`/app/analyze`):**
    - Drag and drop any video (MP4/MOV/WebM) or image (JPG/PNG/WebP).
@@ -95,13 +84,13 @@ python clear_history.py
 
 ---
 
-### 4. Expo Emergency Troubleshooting
+### 3. Expo Emergency Troubleshooting
 
 | Problem | Cause | One-Line Fix |
 |---|---|---|
 | **Port 8080 already in use** (`[Errno 10048]`) | A previous Python API process is still running in the background. | In PowerShell: `Get-Process python -ErrorAction SilentlyContinue \| Stop-Process -Force` |
 | **Port 5173 already in use** | An earlier Vite dev server is running. | Stop it with <kbd>Ctrl</kbd>+<kbd>C</kbd> or run `npm --prefix web run dev` and it will automatically use `5174`. |
-| **Uploaded video loads old results instantly** | Built-in 30-day SHA-256 deduplication cache returned the previous run. | Either run `python clear_history.py` or check the **"Skip the duplicate-file cache"** checkbox under Options before uploading. |
+| **Uploaded video loads previous results** | Built-in 30-day SHA-256 deduplication cache returned the previous run. | Check the **"Skip the duplicate-file cache"** checkbox under Options on the Analyze page before uploading. |
 | **Missing face tracking on video** | Face was obscured or smaller than detector threshold. | Try another video clip with a clearer, forward-facing view of the subject. |
 
 ---
